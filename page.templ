@@ -12,7 +12,7 @@ templ Env(env Environment) {
 			<ul>
 				for _, route := range env.Links.PfRoutes {
 					if strings.HasPrefix(route.Href, "https://") {
-						<li><a href={ "https://" + route.Href } target="_blank">{ route.Href }</a></li>
+						<li><a href={ route.Href } target="_blank">{ route.Href }</a></li>
 					}
 				}
 			</ul>
