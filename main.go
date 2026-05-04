@@ -1,25 +1,27 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/a-h/templ"
 	_ "golang.org/x/crypto/x509roots/fallback"
 )
 
-// OAuthResponse holds the temporary access token from the auth endpoint
+// OAuthResponse holds the temporary access token from the auth endpoint.
 type OAuthResponse struct {
 	AccessToken string `json:"access_token"`
 }
 
-// Environment represents the necessary fields from an Upsun environment
+// Environment represents the necessary fields from an Upsun environment.
 type Environment struct {
 	ID              string          `json:"id"`
 	Name            string          `json:"name"`
@@ -50,27 +52,39 @@ func main() {
 		port = value
 	}
 
-	environments := data()
+	ctx := context.Background()
+
+	environments, err := data(ctx)
+	if err != nil {
+		log.Fatalf("could not get data: %v", err)
+	}
+
 	// Enable streaming in the handler
 	handler := templ.Handler(Page(environments), templ.WithStreaming())
 
-	http.Handle("/", handler)
-
 	log.Printf("Server running on %s\n", port)
 
-	err := http.ListenAndServe(port, nil)
+	//nolint:mnd
+	server := &http.Server{
+		Addr:              port,
+		ReadHeaderTimeout: 3 * time.Second,
+	}
+
+	http.Handle("/", handler)
+
+	err = server.ListenAndServe()
 	if err != nil {
 		log.Fatalf("could not start webserver: %s\n", err)
 	}
 }
 
-func data() []Environment {
+//nolint:cyclop,funlen
+func data(ctx context.Context) ([]Environment, error) {
 	apiToken := os.Getenv("UPSUN_API_TOKEN")
 	projectID := os.Getenv("UPSUN_PROJECT_ID")
 
 	if apiToken == "" || projectID == "" {
-		log.Println("Error: Please set UPSUN_API_TOKEN and UPSUN_PROJECT_ID environment variables.")
-		os.Exit(1)
+		log.Fatalln("please set UPSUN_API_TOKEN and UPSUN_PROJECT_ID environment variables.")
 	}
 
 	// 1. Exchange the API Token for an OAuth Access Token
@@ -78,72 +92,89 @@ func data() []Environment {
 	authData.Set("grant_type", "api_token")
 	authData.Set("api_token", apiToken)
 
-	req, _ := http.NewRequest("POST", "https://auth.upsun.com/oauth2/token", strings.NewReader(authData.Encode()))
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
+		"https://auth.upsun.com/oauth2/token",
+		strings.NewReader(authData.Encode()))
+	if err != nil {
+		log.Fatalf("could not create request: %v\n", err)
+	}
+
 	// Upsun requires basic auth using 'platform-api-user' with no password for token exchange
 	req.SetBasicAuth("platform-api-user", "")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	client := &http.Client{}
+
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Error requesting access token: %v\n", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("error requesting access token: %w", err)
 	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			log.Printf("failed to close response body: %v", err)
-		}
-	}()
 
+	if resp == nil {
+		//nolint:err113
+		return nil, errors.New("error requesting access token: response is nil")
+	}
+
+	defer resp.Body.Close()
+
+	//nolint:err113
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("Failed to authenticate. HTTP Status: %d\n", resp.StatusCode)
-		os.Exit(1)
+		return nil, fmt.Errorf("failed to authenticate, HTTP status: %d", resp.StatusCode)
 	}
 
 	var authResp OAuthResponse
-	if err := json.NewDecoder(resp.Body).Decode(&authResp); err != nil {
-		log.Printf("Error parsing auth response: %v\n", err)
-		os.Exit(1)
+
+	err = json.NewDecoder(resp.Body).Decode(&authResp)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing auth response: %w", err)
 	}
 
 	// 2. Fetch the list of environments
 	envURL := fmt.Sprintf("https://api.upsun.com/projects/%s/environments", projectID)
-	req, _ = http.NewRequest("GET", envURL, nil)
+
+	//nolint:gosec
+	req, err = http.NewRequestWithContext(ctx, http.MethodGet, envURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not create request: %w", err)
+	}
+
 	req.Header.Add("Authorization", "Bearer "+authResp.AccessToken)
 
+	//nolint:gosec
 	resp, err = client.Do(req)
 	if err != nil {
-		log.Printf("Error fetching environments: %v\n", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("error fetching environments: %w", err)
 	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			log.Printf("failed to close response body: %v", err)
-		}
-	}()
 
+	if resp == nil {
+		//nolint:err113
+		return nil, errors.New("error fetching environments: response is nil")
+	}
+
+	defer resp.Body.Close()
+
+	//nolint:err113
 	if resp.StatusCode != http.StatusOK {
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		log.Printf("Failed to get environments. HTTP %d: %s\n", resp.StatusCode, string(bodyBytes))
-		os.Exit(1)
+		return nil, fmt.Errorf("failed to get environments, HTTP status: %d", resp.StatusCode)
 	}
-
-	// body, _ := ioutil.ReadAll(resp.Body)
-	// log.Printf("envs: %s", body)
 
 	// 3. Parse the JSON array and filter for 'active'
 	var environments []Environment
-	if err := json.NewDecoder(resp.Body).Decode(&environments); err != nil {
-		log.Printf("Error parsing environments response: %v\n", err)
-		os.Exit(1)
+
+	err = json.NewDecoder(resp.Body).Decode(&environments)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing environments response: %w", err)
 	}
 
 	var filteredEnvironments []Environment
+
 	for _, env := range environments {
 		if env.IsPR {
 			filteredEnvironments = append(filteredEnvironments, env)
 		}
 	}
 
-	return filteredEnvironments
+	return filteredEnvironments, nil
 }
