@@ -30,8 +30,6 @@ jobs:
         uses: arnested/setup-go@rc
         with:
           go-version-file: go.mod
-      - name: Build changelog
-        run: go tool chglog init
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx

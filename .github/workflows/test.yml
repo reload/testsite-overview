@@ -19,8 +19,6 @@ jobs:
         uses: robherley/go-test-action@v1.0.0
         with:
           testArguments: -race -cover -covermode=atomic -coverprofile=coverage.txt ./...
-      - name: Build changelog
-        run: go tool chglog init
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
