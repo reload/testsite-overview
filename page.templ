@@ -1,12 +1,21 @@
 package main
 
-import "context"
+import (
+	"context"
+	"strings"
+)
 
 templ Env(env Environment) {
 	<article>
 		<header><h2>{ env.Title }</h2></header>
 		if env.DeploymentState.LastStateUpdateSuccessful {
-			<a href={ "https://" + env.URL } target="_blank">{ env.URL }</a>
+			<ul>
+				for _, route := range env.Links.PfRoutes {
+					if strings.HasPrefix(route.Href, "https://") {
+						<li><a href={ "https://" + route.Href } target="_blank">{ route.Href }</a></li>
+					}
+				}
+			</ul>
 		} else {
 			Deployment failed
 		}
