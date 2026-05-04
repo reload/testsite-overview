@@ -64,8 +64,13 @@ func main() {
 			return
 		}
 
+		title, ok := os.LookupEnv("TITLE")
+		if !ok {
+			title = "Test-sites"
+		}
+
 		// 2. Initialize the component with the fresh data
-		component := Page(ctx, environments)
+		component := Page(ctx, environments, title)
 
 		// 3. Use templ's ServeHTTP to render the component
 		// We can still use templ.WithStreaming() by calling the handler directly
