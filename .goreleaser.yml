@@ -1,0 +1,41 @@
+---
+version: 2
+builds:
+  - id: default
+    env:
+      - CGO_ENABLED=0
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{ .CommitDate }}
+dockers_v2:
+  - images:
+      - 'ghcr.io/reload/{{ .ProjectName }}'
+    tags:
+      - '{{ .Tag }}'
+      - 'v{{ .Major }}'
+      - 'latest'
+    ids:
+      - default
+    sbom: false
+    labels:
+      "org.opencontainers.image.authors": "Arne Jørgensen <arne@arnested.dk>"
+      "org.opencontainers.image.created": "{{.CommitDate}}"
+      "org.opencontainers.image.licenses": "MIT"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.source": "https://github.com/reload/{{.ProjectName}}"
+      "org.opencontainers.image.title": "{{.ProjectName}}"
+      "org.opencontainers.image.version": "{{.Version}}"
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  version_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+release:
+  prerelease: auto
