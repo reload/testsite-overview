@@ -23,7 +23,7 @@ templ Env(env Environment) {
 	</article>
 }
 
-templ Page(ctx context.Context, environments []Environment) {
+templ Page(ctx context.Context, environments []Environment, title string) {
 	<!DOCTYPE html>
 	<html>
 		<head>
@@ -34,11 +34,11 @@ templ Page(ctx context.Context, environments []Environment) {
 				rel="stylesheet"
 				href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css"
 			/>
-			<title>Test sites</title>
+			<title>{ title }</title>
 		</head>
 		<body>
 			<main>
-				<h1>Test sites</h1>
+				<h1>{ title }</h1>
 				for _, env := range environments {
 					@Env(env)
 				}
