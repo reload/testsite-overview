@@ -13,6 +13,10 @@ linters:
       check-blank: true
     exhaustive:
       default-signifies-exhaustive: true
+    varnamelen:
+      ignore-decls:
+        - w http.ResponseWriter
+        - r *http.Request
   exclusions:
     generated: lax
     presets:
