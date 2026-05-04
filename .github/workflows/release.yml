@@ -10,7 +10,7 @@ permissions:
   contents: write
   packages: write
 jobs:
-  bump-version:
+  release:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
