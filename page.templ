@@ -1,5 +1,7 @@
 package main
 
+import "context"
+
 templ Env(env Environment) {
 	<article>
 		<header><h2>{ env.Title }</h2></header>
@@ -12,7 +14,7 @@ templ Env(env Environment) {
 	</article>
 }
 
-templ Page(environments []Environment) {
+templ Page(ctx context.Context, environments []Environment) {
 	<!DOCTYPE html>
 	<html>
 		<head>

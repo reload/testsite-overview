@@ -52,15 +52,25 @@ func main() {
 		port = value
 	}
 
-	ctx := context.Background()
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 
-	environments, err := data(ctx)
-	if err != nil {
-		log.Fatalf("could not get data: %v", err)
-	}
+		// 1. Fetch data inside the handler
+		environments, err := data(ctx)
+		if err != nil {
+			http.Error(w, "Could not get data", http.StatusInternalServerError)
+			log.Printf("error fetching data: %v", err)
 
-	// Enable streaming in the handler
-	handler := templ.Handler(Page(environments), templ.WithStreaming())
+			return
+		}
+
+		// 2. Initialize the component with the fresh data
+		component := Page(ctx, environments)
+
+		// 3. Use templ's ServeHTTP to render the component
+		// We can still use templ.WithStreaming() by calling the handler directly
+		templ.Handler(component, templ.WithStreaming()).ServeHTTP(w, r)
+	})
 
 	log.Printf("Server running on %s\n", port)
 
@@ -70,9 +80,7 @@ func main() {
 		ReadHeaderTimeout: 3 * time.Second,
 	}
 
-	http.Handle("/", handler)
-
-	err = server.ListenAndServe()
+	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatalf("could not start webserver: %s\n", err)
 	}
