@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -109,7 +110,8 @@ func data(ctx context.Context) ([]Environment, error) {
 		ctx,
 		http.MethodPost,
 		"https://auth.upsun.com/oauth2/token",
-		strings.NewReader(authData.Encode()))
+		strings.NewReader(authData.Encode()),
+	)
 	if err != nil {
 		log.Fatalf("could not create request: %v\n", err)
 	}
@@ -190,4 +192,27 @@ func data(ctx context.Context) ([]Environment, error) {
 	}
 
 	return filteredEnvironments, nil
+}
+
+func filterURL(url string) (string, string, bool) {
+	linkRegExp, ok := os.LookupEnv("LINK_REGEXP")
+	if !ok {
+		linkRegExp = "^https://"
+	}
+
+	urlRegExp := regexp.MustCompile(linkRegExp)
+
+	if !urlRegExp.MatchString(url) {
+		return "", "", false
+	}
+
+	text := url
+
+	matches := urlRegExp.FindSubmatch([]byte(url))
+
+	if len(matches) > 1 {
+		text = string(matches[1])
+	}
+
+	return url, text, true
 }

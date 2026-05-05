@@ -1,9 +1,6 @@
 package main
 
-import (
-	"context"
-	"strings"
-)
+import "context"
 
 templ Env(env Environment) {
 	<article>
@@ -11,8 +8,9 @@ templ Env(env Environment) {
 		if env.DeploymentState.LastStateUpdateSuccessful {
 			<ul>
 				for _, route := range env.Links.PfRoutes {
-					if strings.HasPrefix(route.Href, "https://") {
-						<li><a href={ route.Href } target="_blank">{ route.Href }</a></li>
+					{{ url, text, ok := filterURL(route.Href) }}
+					if ok {
+						<li><a href={ url } target="_blank">{ text }</a></li>
 					}
 				}
 			</ul>
