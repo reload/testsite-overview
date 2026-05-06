@@ -56,7 +56,6 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		// 1. Fetch data inside the handler
 		environments, err := data(ctx)
 		if err != nil {
 			http.Error(w, "Could not get data", http.StatusInternalServerError)
@@ -70,20 +69,17 @@ func main() {
 			title = "Test-sites"
 		}
 
-		// 2. Initialize the component with the fresh data
 		component := Page(ctx, environments, title)
-
-		// 3. Use templ's ServeHTTP to render the component
-		// We can still use templ.WithStreaming() by calling the handler directly
 		templ.Handler(component, templ.WithStreaming()).ServeHTTP(w, r)
 	})
 
 	log.Printf("Server running on %s\n", port)
 
-	//nolint:mnd
+	const readHeaderTimeoutSeconds = 3
+
 	server := &http.Server{
 		Addr:              port,
-		ReadHeaderTimeout: 3 * time.Second,
+		ReadHeaderTimeout: time.Duration(readHeaderTimeoutSeconds) * time.Second,
 	}
 
 	err := server.ListenAndServe()
@@ -101,7 +97,7 @@ func data(ctx context.Context) ([]Environment, error) {
 		log.Fatalln("please set UPSUN_API_TOKEN and UPSUN_PROJECT_ID environment variables.")
 	}
 
-	// 1. Exchange the API Token for an OAuth Access Token
+	// Exchange the API Token for an OAuth Access Token
 	authData := url.Values{}
 	authData.Set("grant_type", "api_token")
 	authData.Set("api_token", apiToken)
@@ -116,8 +112,7 @@ func data(ctx context.Context) ([]Environment, error) {
 		log.Fatalf("could not create request: %v\n", err)
 	}
 
-	// Upsun requires basic auth using 'platform-api-user' with no password for token exchange
-	req.SetBasicAuth("platform-api-user", "")
+	req.SetBasicAuth("platform-api-user", "") // Upsun requires this user with no password
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	client := &http.Client{}
@@ -146,7 +141,7 @@ func data(ctx context.Context) ([]Environment, error) {
 		return nil, fmt.Errorf("error parsing auth response: %w", err)
 	}
 
-	// 2. Fetch the list of environments
+	// Fetch the list of environments
 	envURL := fmt.Sprintf("https://api.upsun.com/projects/%s/environments", projectID)
 
 	//nolint:gosec
@@ -175,7 +170,7 @@ func data(ctx context.Context) ([]Environment, error) {
 		return nil, fmt.Errorf("failed to get environments, HTTP status: %d", resp.StatusCode)
 	}
 
-	// 3. Parse the JSON array and filter for 'active'
+	// Parse the JSON array and filter for PR environments
 	var environments []Environment
 
 	err = json.NewDecoder(resp.Body).Decode(&environments)
