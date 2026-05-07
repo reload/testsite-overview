@@ -182,7 +182,7 @@ func data(ctx context.Context) ([]Environment, error) {
 	var filteredEnvironments []Environment
 
 	for _, env := range environments {
-		if env.IsPR {
+		if env.IsPR && env.Status == "active" && env.DeploymentState.LastStateUpdateSuccessful {
 			filteredEnvironments = append(filteredEnvironments, env)
 		}
 	}
