@@ -70,7 +70,7 @@ func main() {
 		}
 
 		component := Page(ctx, environments, title)
-		templ.Handler(component, templ.WithStreaming()).ServeHTTP(w, r)
+		templ.Handler(component).ServeHTTP(w, r)
 	})
 
 	log.Printf("Server running on %s\n", port)
