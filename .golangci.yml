@@ -18,6 +18,9 @@ linters:
       ignore-decls:
         - w http.ResponseWriter
         - r *http.Request
+      ignore-names:
+        - ok
+        - tt
   exclusions:
     generated: lax
     presets:
