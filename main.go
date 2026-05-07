@@ -84,7 +84,7 @@ func main() {
 
 	err := server.ListenAndServe()
 	if err != nil {
-		log.Fatalf("could not start webserver: %s\n", err)
+		log.Printf("could not start webserver: %s\n", err)
 	}
 }
 
@@ -94,7 +94,8 @@ func data(ctx context.Context) ([]Environment, error) {
 	projectID := os.Getenv("UPSUN_PROJECT_ID")
 
 	if apiToken == "" || projectID == "" {
-		log.Fatalln("please set UPSUN_API_TOKEN and UPSUN_PROJECT_ID environment variables.")
+		//nolint:err113
+		return nil, errors.New("please set UPSUN_API_TOKEN and UPSUN_PROJECT_ID environment variables")
 	}
 
 	// Exchange the API Token for an OAuth Access Token
@@ -109,7 +110,7 @@ func data(ctx context.Context) ([]Environment, error) {
 		strings.NewReader(authData.Encode()),
 	)
 	if err != nil {
-		log.Fatalf("could not create request: %v\n", err)
+		return nil, fmt.Errorf("could not create request: %w", err)
 	}
 
 	req.SetBasicAuth("platform-api-user", "") // Upsun requires this user with no password
