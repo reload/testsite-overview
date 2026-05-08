@@ -44,9 +44,7 @@ templ Page(ctx context.Context, title string) {
 		<body>
 			<main>
 				<h1>{ title }</h1>
-				<section hx-get="/_envs" hx-trigger="load" hx-swap="outerHTML" style="display: flex; height: 100vh;">
-					<div aria-busy="true" style="margin: auto;"></div>
-				</section>
+				<div aria-busy="true" hx-get="/_envs" hx-trigger="load" hx-swap="outerHTML">Loading...</div>
 			</main>
 		</body>
 	</html>
