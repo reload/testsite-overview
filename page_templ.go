@@ -197,7 +197,7 @@ func Page(ctx context.Context, title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</h1><section hx-get=\"/_envs\" hx-trigger=\"load\" hx-swap=\"outerHTML\" style=\"display: flex; height: 100vh;\"><div aria-busy=\"true\" style=\"margin: auto;\"></div></section></main></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</h1><div aria-busy=\"true\" hx-get=\"/_envs\" hx-trigger=\"load\" hx-swap=\"outerHTML\">Loading...</div></main></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
