@@ -56,6 +56,18 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		title, ok := os.LookupEnv("TITLE")
+		if !ok {
+			title = "Test-sites"
+		}
+
+		component := Page(ctx, title)
+		templ.Handler(component).ServeHTTP(w, r)
+	})
+
+	http.HandleFunc("/_envs", func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
 		environments, err := data(ctx)
 		if err != nil {
 			http.Error(w, "Could not get data", http.StatusInternalServerError)
@@ -64,12 +76,7 @@ func main() {
 			return
 		}
 
-		title, ok := os.LookupEnv("TITLE")
-		if !ok {
-			title = "Test-sites"
-		}
-
-		component := Page(ctx, environments, title)
+		component := Environments(ctx, environments)
 		templ.Handler(component).ServeHTTP(w, r)
 	})
 
