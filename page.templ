@@ -21,13 +21,20 @@ templ Env(env Environment) {
 	</article>
 }
 
-templ Page(ctx context.Context, environments []Environment, title string) {
+templ Environments(ctx context.Context, environments []Environment) {
+	for _, env := range environments {
+		@Env(env)
+	}
+}
+
+templ Page(ctx context.Context, title string) {
 	<!DOCTYPE html>
 	<html>
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<meta name="color-scheme" content="light dark"/>
+			<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js" integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V" crossorigin="anonymous"></script>
 			<link
 				rel="stylesheet"
 				href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css"
@@ -37,9 +44,9 @@ templ Page(ctx context.Context, environments []Environment, title string) {
 		<body>
 			<main>
 				<h1>{ title }</h1>
-				for _, env := range environments {
-					@Env(env)
-				}
+				<section hx-get="/_envs" hx-trigger="load" hx-swap="outerHTML" style="display: flex; height: 100vh;">
+					<div aria-busy="true" style="margin: auto;"></div>
+				</section>
 			</main>
 		</body>
 	</html>
