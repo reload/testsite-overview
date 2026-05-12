@@ -3,7 +3,7 @@ module github.com/reload/testsite-overview
 go 1.26.3
 
 require (
-	github.com/a-h/templ v0.3.1001
+	github.com/a-h/templ v0.3.1020
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20260501174432-fd0b90d21f9a
 )
 
@@ -20,9 +20,9 @@ require (
 	github.com/natefinch/atomic v1.0.1 // indirect
 	go.uber.org/nilaway v0.0.0-20260318203545-ad240b12fb4c // indirect
 	golang.org/x/mod v0.27.0 // indirect
-	golang.org/x/net v0.43.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/tools v0.36.0 // indirect
 )
 
