@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -11,6 +12,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/a-h/templ"
@@ -204,18 +206,47 @@ func filterURL(url string) (string, string, bool) {
 	}
 
 	urlRegExp := regexp.MustCompile(linkRegExp)
-
 	if !urlRegExp.MatchString(url) {
 		return "", "", false
 	}
 
-	text := url
+	titleTemplate, ok := os.LookupEnv("LINK_TITLE_TEMPLATE")
+	if !ok {
+		titleTemplate = "{{ .URL }}"
+	}
+
+	templ, err := template.New("title").Parse(titleTemplate)
+	if err != nil {
+		return "", "", false
+	}
+
+	templateData := make(map[string]string)
+	templateData["URL"] = url
+
+	groupNames := urlRegExp.SubexpNames()
+	for _, name := range groupNames {
+		if name != "" {
+			templateData[name] = ""
+		}
+	}
 
 	matches := urlRegExp.FindSubmatch([]byte(url))
 
-	if len(matches) > 1 {
-		text = string(matches[1])
+	if len(matches) > 0 {
+		for i, matchValue := range matches {
+			groupName := groupNames[i]
+			if groupName != "" {
+				templateData[groupName] = string(matchValue)
+			}
+		}
 	}
 
-	return url, text, true
+	var buf bytes.Buffer
+
+	err = templ.Execute(&buf, templateData)
+	if err != nil {
+		return "", "", false
+	}
+
+	return url, buf.String(), true
 }

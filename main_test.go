@@ -7,7 +7,8 @@ import (
 )
 
 func TestFilterURL(t *testing.T) {
-	t.Setenv("LINK_REGEXP", `^https://([\w.-]+)`) // capture domain
+	t.Setenv("LINK_REGEXP", `^https://(?P<domain>[\w.-]+)`) // capture domain
+	t.Setenv("LINK_TITLE_TEMPLATE", "{{ or .domain \"foo\" }}")
 
 	tests := []struct {
 		input      string
