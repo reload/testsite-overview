@@ -20,9 +20,9 @@ require (
 	github.com/natefinch/atomic v1.0.1 // indirect
 	go.uber.org/nilaway v0.0.0-20260318203545-ad240b12fb4c // indirect
 	golang.org/x/mod v0.27.0 // indirect
-	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/tools v0.36.0 // indirect
 )
 
