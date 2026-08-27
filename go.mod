@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	github.com/a-h/templ v0.3.1020
-	golang.org/x/crypto/x509roots/fallback v0.0.0-20260501174432-fd0b90d21f9a
+	golang.org/x/crypto/x509roots/fallback v0.0.0-20260826144058-afebf4cb4efb
 )
 
 require (
@@ -14,16 +14,17 @@ require (
 	github.com/cli/browser v1.3.0 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.6 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
-	go.uber.org/nilaway v0.0.0-20260318203545-ad240b12fb4c // indirect
-	golang.org/x/mod v0.27.0 // indirect
+	go.uber.org/nilaway v0.0.0-20260808063849-8649a03c818a // indirect
+	golang.org/x/exp/typeparams v0.0.0-20260611194520-c48552f49976 // indirect
+	golang.org/x/mod v0.36.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
-	golang.org/x/tools v0.36.0 // indirect
+	golang.org/x/tools v0.45.0 // indirect
 )
 
 tool (
