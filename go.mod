@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	github.com/a-h/templ v0.3.1020
-	golang.org/x/crypto/x509roots/fallback v0.0.0-20260501174432-fd0b90d21f9a
+	golang.org/x/crypto/x509roots/fallback v0.0.0-20260826144058-afebf4cb4efb
 )
 
 require (
